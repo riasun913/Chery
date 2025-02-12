@@ -1,0 +1,41 @@
+name: Merge HTML Files and Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # 每次推送到 main 分支时触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3  # 拉取最新代码
+
+    - name: Merge HTML Files
+      run: |
+        echo "<!DOCTYPE html>
+        <html lang='zh'>
+        <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>合并后的 HTML</title>
+        </head>
+        <body>" > merged.html
+
+        for file in *.html; do
+          if [ "$file" != "merged.html" ]; then
+            echo "<div><h2>$file</h2>" >> merged.html
+            cat "$file" >> merged.html
+            echo "</div><hr>" >> merged.html
+          fi
+        done
+
+        echo "</body></html>" >> merged.html
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages  # 部署到 gh-pages 分支
+        folder: .  # 部署整个项目目录
