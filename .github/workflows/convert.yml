@@ -1,0 +1,27 @@
+name: Convert PDF to HTML
+on:
+  push:
+    paths: ["*.pdf"]          # 只有 PDF 变化才触发
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4                 # 拉取代码
+
+      # ① PDF → HTML
+      - uses: SichangHe/pdf2htmlEX-action@v0.0.2  # 封装好的转换工具
+        with:
+          arguments: "OM TIGGO CROSS (Update 260225).pdf out/index.html --embed cfijo"
+
+      # ② 移到 docs 目录
+      - run: |
+          mkdir -p docs
+          mv out/* docs/
+
+      # ③ 推回 main 分支
+      - run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git add docs
+          git commit -m "auto: update HTML" || echo "nothing to commit"
+          git push
